@@ -150,9 +150,6 @@ int depth_first(Node *n) {
 
 		depth_first(target);
 
-		//n->setRecursionMade();
-
-
 		dir = n->getRandomUnusedDir();
 	}
 

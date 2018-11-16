@@ -27,8 +27,8 @@ Node::Node(int pos_x, int pos_y, float rect_W, float rect_H, int _lin, int _col)
 
 	this->shapes[DOWN_DIR] = new sf::RectangleShape(sf::Vector2f(rectangle_W, rectangle_H / BORDER_FACTOR));
 	this->shapes[DOWN_DIR]->setPosition(
-		position_x * rectangle_W + (BORDER_FACTOR - 1)*(rectangle_H / BORDER_FACTOR), 
-		position_y * rectangle_H
+		position_x * rectangle_W, 
+		position_y * rectangle_H + (BORDER_FACTOR - 1)*(rectangle_H / BORDER_FACTOR)
 	);
 	this->shapes[DOWN_DIR]->setFillColor(sf::Color::Black);
 
@@ -38,8 +38,8 @@ Node::Node(int pos_x, int pos_y, float rect_W, float rect_H, int _lin, int _col)
 
 	this->shapes[RIGHT_DIR] = new sf::RectangleShape(sf::Vector2f(rectangle_W / BORDER_FACTOR, rectangle_H));
 	this->shapes[RIGHT_DIR]->setPosition(
-		position_x * rectangle_W,
-		position_y * rectangle_H + (BORDER_FACTOR - 1)*(rectangle_W / BORDER_FACTOR)
+		position_x * rectangle_W + (BORDER_FACTOR - 1)*(rectangle_W / BORDER_FACTOR),
+		position_y * rectangle_H 
 	);
 	this->shapes[RIGHT_DIR]->setFillColor(sf::Color::Black);
 
@@ -106,6 +106,9 @@ void Node::setVisited() {
 	this->visited = true;
 	this->shapes[4]->setFillColor(Node::selected_color);
 
+	//	sf::Color(rand() % 256, rand() % 256, rand() % 256);
+
+
 }
 
 void Node::setStart() {
@@ -131,13 +134,14 @@ void Node::blockDirection(int dir) {
 	this->shapes[dir]->setFillColor(sf::Color::Black);
 	this->directions[dir] = this;
 
+	//this->shapes[UP_DIR]->setFillColor(sf::Color::Green);
 }
 
 int Node::getRandomUnusedDir() {
 	
 	int random = std::rand() % 4;
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 4; i++) {
 	
 		if (this->directions[random] == NULL) {
 
