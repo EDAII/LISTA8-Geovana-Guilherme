@@ -7,7 +7,8 @@ class Node {
 public:
 
 	Node(int, int, float, float, int, int);
-
+	~Node();
+	
 	void registerDirection(int direction, Node * n);
 
 	void setVisited();

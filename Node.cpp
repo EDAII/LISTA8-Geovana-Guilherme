@@ -1,5 +1,6 @@
 #include "Node.h"
 
+#include <iostream>
 #include <algorithm>
 
 
@@ -16,6 +17,11 @@ Node::Node(int pos_x, int pos_y, float rect_W, float rect_H, int _lin, int _col)
 	this->directions = (Node **)calloc(4, sizeof(Node *));
 
 	this->shapes = (sf::Shape **) calloc(this->shape_count, sizeof(sf::Shape *));
+
+	if (this->shapes == NULL) {
+		std::cout << "Error allocating shapes" << "\n";
+		exit(-1);
+	}
 	
 	this->shapes[4] = new sf::RectangleShape(sf::Vector2f(rectangle_W, rectangle_H));
 	this->shapes[4]->setPosition(position_x * rectangle_W, position_y * rectangle_H);
@@ -61,6 +67,16 @@ Node::Node(int pos_x, int pos_y, float rect_W, float rect_H, int _lin, int _col)
 
 }
 
+Node::~Node() {
+
+	for (int i = 0; i < this->shape_count; i++) {
+		delete this->shapes[i];
+	}
+
+	delete this->directions;
+
+}
+
 void Node::registerDirection(int direction, Node *n) {
 
 	this->directions[direction] = n;
@@ -68,7 +84,7 @@ void Node::registerDirection(int direction, Node *n) {
 	this->shapes[direction]->setFillColor(sf::Color::Transparent);
 
 	// set bidirectional (reverse) conection on Node n
-	int reverse_direction;
+	int reverse_direction = 0;
 
 	switch (direction)
 	{
