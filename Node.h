@@ -9,12 +9,17 @@ public:
 	Node(int, int, float, float, int, int);
 	~Node();
 	
+	friend bool operator <(const Node&, const Node&);
+
 	void registerDirection(int direction, Node * n);
 
 	void setVisited();
 	void setStart();
 	void setEnd();
 	void setRecursionMade();
+
+	void setCheckedPath();
+	void setRealPath();
 
 	void blockDirection(int dir);
 
@@ -43,9 +48,11 @@ public:
 	const sf::Color end_color = sf::Color::Magenta;
 	
 
-	static constexpr float BORDER_FACTOR = 7.5f;
+	static constexpr float BORDER_FACTOR = 15.75;
 
 	bool visited = false;
+	bool path_check = false;
+	bool end_point = false;
 
 	int position_x;
 	int position_y;

@@ -77,6 +77,7 @@ Node::~Node() {
 
 }
 
+
 void Node::registerDirection(int direction, Node *n) {
 
 	this->directions[direction] = n;
@@ -119,7 +120,7 @@ void Node::registerDirection(int direction, Node *n) {
 
 void Node::setVisited() {
 
-	this->visited = true;
+	this->visited = true;	
 	this->shapes[4]->setFillColor(Node::selected_color);
 
 	//	sf::Color(rand() % 256, rand() % 256, rand() % 256);
@@ -136,12 +137,29 @@ void Node::setStart() {
 void Node::setEnd() {
 
 	this->shapes[4]->setFillColor(Node::end_color);
+	this->end_point = true;
 
 }
 
 void Node::setRecursionMade() {
 
 	this->shapes[4]->setFillColor(Node::recursion_made_color);
+
+}
+
+void Node::setCheckedPath() {
+
+	if (this->shapes[4]->getFillColor() != this->start_color && this->shapes[4]->getFillColor() != this->end_color)
+		this->shapes[4]->setFillColor(this->path_step_color);
+	
+	this->path_check = true;
+
+}
+
+void Node::setRealPath() {
+
+	if (this->shapes[4]->getFillColor() != this->start_color && this->shapes[4]->getFillColor() != this->end_color)
+		this->shapes[4]->setFillColor(this->path_color);
 
 }
 
@@ -176,4 +194,9 @@ int Node::getRandomUnusedDir() {
 
 	// no free border
 	return -1;
+}
+
+bool operator<(const Node &a, const Node &b) {
+
+	return a.position_x < b.position_x && a.position_y < b.position_y;
 }

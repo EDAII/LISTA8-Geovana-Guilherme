@@ -4,17 +4,27 @@
 #include <cstdlib>
 #include <iostream>
 #include <ctime>
+#include <queue>
+#include <map>
+#include <list>
 
 
 #include "Node.h"
 
 
 Node **nodes;
+
+Node *start;
+Node *end;
+
 sf::Mutex node_mutex;
 bool skip_render = false;
 
 bool generation_running = false;
 bool generated = false;
+
+bool solving = false;
+bool solved = false;
 
 
 int lin = 30;// 55;
@@ -60,7 +70,7 @@ void generateNodes() {
 
 	node_mutex.unlock();
 
-
+	solved = false;
 	skip_render = false;
 }
 
@@ -98,6 +108,58 @@ void renderingThread(sf::RenderWindow* window) {
 		
 		// end the current frame -- this is a rendering function (it requires the context to be active)
 		window->display();
+
+	}
+
+}
+
+void breadth_first(Node *start, Node *end) {
+	
+	std::queue<Node *> node_queue;
+	std::map<Node *, Node *> path_map; // <current node, parent node> 
+
+
+	node_queue.push(start);
+
+	while (node_queue.empty() == false)	{
+
+		sf::sleep(sf::milliseconds(ms_wait));
+
+		Node *current = node_queue.front();
+		node_queue.pop();
+
+		current->setCheckedPath();
+
+		if (current == end) break;
+
+		for (int i = 0; i < 4; i++) {
+		
+			Node *directed_node = current->directions[i];
+
+			if (directed_node != NULL && directed_node->path_check == false) {
+			
+				node_queue.push(directed_node);
+
+				// insert on map with current as parent, this is for the backtrace of the path
+				path_map.insert({ directed_node, current });
+			}
+		}
+
+	}
+
+
+	// since 'end' is the same as the last 'current' that was inserted into the map,
+	// we can use it to find the last element parent
+	Node *current = end;
+	while (current != start) {
+
+		sf::sleep(sf::milliseconds(ms_wait));
+
+		Node *parent = path_map[current];
+		
+		current->setRealPath();
+
+		current = parent;
 
 	}
 
@@ -206,8 +268,8 @@ void generationThread() {
 
 	// generate maze with depth first
 
-	Node *start = nodes[start_points[1] * col + start_points[0]];
-	Node *end = nodes[end_points[1] * col + end_points[0]];
+	start = nodes[start_points[1] * col + start_points[0]];
+	end = nodes[end_points[1] * col + end_points[0]];
 
 	std::cout << "Start x = " << start_points[0] << " y = " << start_points[1] << "\n";
 	std::cout << "End x = " << end_points[0] << " y = " << end_points[1] << "\n";
@@ -220,15 +282,26 @@ void generationThread() {
 	start->setStart();
 	end->setEnd();
 
-	// find solution with breadth first
-
 	// unlock
 	node_mutex.unlock();
 
-	
-
 	generation_running = false;
 	generated = true;
+}
+
+void solveThread() {
+
+	solving = true;
+
+	node_mutex.lock();
+
+	// find solution with breadth first
+	breadth_first(start, end);
+
+	node_mutex.unlock();
+
+	solved = true;
+	solving = false;
 }
 
 int main() {
@@ -250,6 +323,7 @@ int main() {
 	rend_thread.launch();
 
 	sf::Thread gen_thread(&generationThread);
+	sf::Thread solve_thread(&solveThread);
 
 	// the event/logic/whatever loop
 	while (window.isOpen()) {
@@ -292,8 +366,13 @@ int main() {
 					else {
 						continue;
 					}
-				}
-				else if (event.key.code == sf::Keyboard::Q) {
+				} else if (event.key.code == sf::Keyboard::S) {
+				
+					if (generated && solving == false && solved == false)
+						solve_thread.launch();
+
+
+				} else if (event.key.code == sf::Keyboard::Q) {
 
 					if (ms_wait - ms_step > 0) ms_wait -= ms_step; else ms_wait = 0;
 
